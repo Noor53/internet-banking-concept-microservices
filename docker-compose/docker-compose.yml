@@ -152,7 +152,7 @@ services:
         ipv4_address: 172.25.0.20
 
   grafana:
-    image: grafana/grafana:9.5.11
+    image: grafana/grafana:latest
     container_name: grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
