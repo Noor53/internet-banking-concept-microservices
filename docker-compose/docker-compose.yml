@@ -63,6 +63,8 @@ services:
     container_name: internet-banking-config-server
     ports:
       - 8090:8090
+    volumes:
+      - ./internet-banking-config-server/src/main/resources/application-docker.yml:/config/application-docker.yml:ro
     networks:
       javatodev_ib_network:
         ipv4_address: 172.25.0.8
@@ -72,6 +74,8 @@ services:
     container_name: internet-banking-service-registry
     ports:
       - 8081:8081
+    volumes:
+      - ./internet-banking-service-registry/src/main/resources/application-docker.yml:/config/application-docker.yml:ro
     networks:
       javatodev_ib_network:
         ipv4_address: 172.25.0.7
@@ -82,6 +86,8 @@ services:
     ports:
       - 8082:8082
     entrypoint: ["./wait-for-it.sh", "internet-banking-service-registry:8081", "--timeout=50", "--", "./wait-for-it.sh", "internet-banking-config-server:8090", "--timeout=50", "--", "java", "-jar", "-Dspring.profiles.active=docker", "/app.jar"]
+    volumes:
+      - ./internet-banking-api-gateway/src/main/resources/application-docker.yml:/config/application-docker.yml:ro
     networks:
       javatodev_ib_network:
         ipv4_address: 172.25.0.6
@@ -92,6 +98,8 @@ services:
     ports:
       - 8083:8083
     entrypoint: ["./wait-for-it.sh", "internet-banking-service-registry:8081", "--timeout=50", "--", "./wait-for-it.sh", "internet-banking-config-server:8090", "--timeout=50", "--", "./wait-for-it.sh", "mysql_core_db:3306", "--timeout=50", "--","java", "-jar", "-Dspring.profiles.active=docker", "/app.jar"]
+    volumes:
+      - ./internet-banking-user-service/src/main/resources/application-docker.yml:/config/application-docker.yml:ro
     networks:
       javatodev_ib_network:
         ipv4_address: 172.25.0.5
@@ -102,6 +110,8 @@ services:
     ports:
       - 8084:8084
     entrypoint: ["./wait-for-it.sh", "internet-banking-service-registry:8081", "--timeout=50", "--", "./wait-for-it.sh", "internet-banking-config-server:8090", "--timeout=50", "--", "./wait-for-it.sh", "mysql_core_db:3306", "--timeout=50", "--","java", "-jar", "-Dspring.profiles.active=docker", "/app.jar"]
+    volumes:
+      - ./internet-banking-fund-transfer-service/src/main/resources/application-docker.yml:/config/application-docker.yml:ro
     networks:
       javatodev_ib_network:
         ipv4_address: 172.25.0.4
@@ -112,6 +122,8 @@ services:
     ports:
       - 8085:8085
     entrypoint: ["./wait-for-it.sh", "internet-banking-service-registry:8081", "--timeout=50", "--", "./wait-for-it.sh", "internet-banking-config-server:8090", "--timeout=50", "--", "./wait-for-it.sh", "mysql_core_db:3306", "--timeout=50", "--","java", "-jar", "-Dspring.profiles.active=docker", "/app.jar"]
+    volumes:
+      - ./internet-banking-utility-payment-service/src/main/resources/application-docker.yml:/config/application-docker.yml:ro
     networks:
       javatodev_ib_network:
         ipv4_address: 172.25.0.3
@@ -122,9 +134,38 @@ services:
     ports:
       - 8092:8092
     entrypoint: ["./wait-for-it.sh", "internet-banking-service-registry:8081", "--timeout=50", "--", "./wait-for-it.sh", "internet-banking-config-server:8090", "--timeout=50", "--", "./wait-for-it.sh", "mysql_core_db:3306", "--timeout=50", "--","java", "-jar", "-Dspring.profiles.active=docker", "/app.jar"]
+    volumes:
+      - ./core-banking-service/src/main/resources/application-docker.yml:/config/application-docker.yml:ro
     networks:
       javatodev_ib_network:
         ipv4_address: 172.25.0.2
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - 9090:9090
+    networks:
+      javatodev_ib_network:
+        ipv4_address: 172.25.0.20
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+    networks:
+      javatodev_ib_network:
+        ipv4_address: 172.25.0.21
 
 volumes:
   postgres_data:

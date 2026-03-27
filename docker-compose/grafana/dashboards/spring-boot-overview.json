@@ -1,0 +1,24 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": null,
+    "title": "Spring Boot Overview",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "JVM Memory Used",
+        "targets": [
+          {
+            "expr": "jvm_memory_used_bytes",
+            "legendFormat": "{{instance}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 0, "w": 24, "h": 9 }
+      }
+    ],
+    "schemaVersion": 16,
+    "version": 0
+  },
+  "overwrite": false
+}
